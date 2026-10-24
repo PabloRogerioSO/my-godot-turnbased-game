@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://ct2x64d3xj03v"]
+
+[ext_resource type="Script" uid="uid://dbhjt6eh6ndat" path="res://scenes/entities/character_card.gd" id="1_3xyee"]
+[ext_resource type="PackedScene" uid="uid://dvwg7ahpaagi8" path="res://scenes/entities/health_bar.tscn" id="2_cimuu"]
+
+[node name="CharacterCard" type="Control" unique_id=261705848]
+custom_minimum_size = Vector2(100, 140)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_3xyee")
+
+[node name="CardRect" type="ColorRect" parent="." unique_id=1714928041]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2509804, 0.2509804, 0.29803923, 1)
+
+[node name="NameLabel" type="Label" parent="." unique_id=1471585646]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+text = "Nome"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusIconContainer" type="HBoxContainer" parent="." unique_id=880559404]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0, 8.615)
+theme_override_constants/separation = 4
+
+[node name="HealthBar" parent="." unique_id=1625219164 instance=ExtResource("2_cimuu")]
+custom_minimum_size = Vector2(90, 20)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 0

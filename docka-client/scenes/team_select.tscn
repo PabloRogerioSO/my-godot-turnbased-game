@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://btm7l4dw76otm"]
+
+[ext_resource type="Script" uid="uid://bjy8nasp4tjr2" path="res://scenes/team_select.gd" id="1_cf774"]
+
+[node name="TeamSelect" type="Control" unique_id=802196690]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_cf774")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1215779332]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1522410409]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=1743401986]
+layout_mode = 2
+text = "Select 3 Heroes"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1834839713]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="VBoxContainer" unique_id=750373772]
+layout_mode = 2
+text = "Selected Team"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=1322302441]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="VBoxContainer" unique_id=1211110292]
+layout_mode = 2
+text = "Start Battle"

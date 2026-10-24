@@ -1,0 +1,39 @@
+{
+    // --- General Editor & Theme ---
+    "workbench.colorTheme": "GitHub Dark Default",
+    "editor.minimap.enabled": false,
+    "editor.linkedEditing": true,
+    "diffEditor.ignoreTrimWhitespace": false,
+
+    // --- Git (Monorepo friendly) ---
+    "git.openRepositoryInParentFolders": "never",
+
+    // --- GitHub Copilot ---
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": true,
+        "markdown": false,
+        "scminput": false
+    },
+
+    // --- Godot 4 Specifics ---
+    // IMPORTANT: Change this path to where your Godot executable is located
+    "godotTools.editorPath.godot4": "C:\\Users\\pablo\\Downloads\\Godot\\Godot_v4.7.2-stable_win64.exe",
+    "[gdscript]": {
+        "editor.formatOnSave": false,
+        "editor.insertSpaces": false,       
+        "editor.detectIndentation": false   
+    },
+
+    // --- Go Specifics ---
+    "[go]": {
+        "editor.formatOnSave": true,
+        "editor.insertSpaces": false,       
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+
+    "godotTools.lsp.serverPort": 6005,
+}

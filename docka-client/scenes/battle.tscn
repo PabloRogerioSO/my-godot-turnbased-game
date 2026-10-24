@@ -1,0 +1,295 @@
+[gd_scene format=3 uid="uid://dbtf64iv4dsa5"]
+
+[ext_resource type="PackedScene" uid="uid://ct2x64d3xj03v" path="res://scenes/entities/character_card.tscn" id="1_dn72j"]
+[ext_resource type="Script" uid="uid://b1qefjjo6j40b" path="res://scenes/battle.gd" id="1_th188"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hveom"]
+bg_color = Color(0.38753432, 0.6826635, 0.37726316, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cs4ly"]
+bg_color = Color(0.101960786, 0.10980392, 0.13725491, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2mw1b"]
+bg_color = Color(0.101960786, 0.10980392, 0.13725491, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h37n4"]
+content_margin_left = 40.0
+content_margin_top = 40.0
+content_margin_right = 40.0
+content_margin_bottom = 40.0
+bg_color = Color(0.1254902, 0.13333334, 0.16470589, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="Battle" type="Control" unique_id=2063042894]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_th188")
+
+[node name="Background" type="ColorRect" parent="." unique_id=717963862]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.13065574, 0.14691576, 0.19025707, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=769868462]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="MainVBox" type="VBoxContainer" parent="MarginContainer" unique_id=1532978223]
+layout_mode = 2
+
+[node name="TopBar" type="HBoxContainer" parent="MarginContainer/MainVBox" unique_id=566337823]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="MarginContainer/MainVBox/TopBar" unique_id=1551369088]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.16
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainVBox/TopBar" unique_id=1230839372]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "PvE"
+horizontal_alignment = 1
+
+[node name="ConfigPanel" type="PanelContainer" parent="MarginContainer/MainVBox/TopBar" unique_id=1391553935]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hveom")
+
+[node name="ConfigVBox" type="VBoxContainer" parent="MarginContainer/MainVBox/TopBar/ConfigPanel" unique_id=472486427]
+layout_mode = 2
+alignment = 2
+
+[node name="AutoModeCheckBox" type="CheckButton" parent="MarginContainer/MainVBox/TopBar/ConfigPanel/ConfigVBox" unique_id=481362731]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+text = "Auto Mode"
+
+[node name="ResetButton" type="Button" parent="MarginContainer/MainVBox/TopBar/ConfigPanel/ConfigVBox" unique_id=416931419]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+text = "Restart"
+
+[node name="TurnLabel" type="Label" parent="MarginContainer/MainVBox" unique_id=1408257721]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Waiting for..."
+
+[node name="VerticalSpacer" type="Control" parent="MarginContainer/MainVBox" unique_id=176558491]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TeamRow" type="HBoxContainer" parent="MarginContainer/MainVBox" unique_id=1135577212]
+layout_mode = 2
+
+[node name="PlayerTeam" type="HBoxContainer" parent="MarginContainer/MainVBox/TeamRow" unique_id=1139299951]
+layout_mode = 2
+
+[node name="Char1" parent="MarginContainer/MainVBox/TeamRow/PlayerTeam" unique_id=261705848 instance=ExtResource("1_dn72j")]
+layout_mode = 2
+entity_id = "h1"
+character_name = "Knight"
+card_color = Color(0.49504763, 0.0047616353, 0.1191945, 1)
+
+[node name="Char2" parent="MarginContainer/MainVBox/TeamRow/PlayerTeam" unique_id=2118769107 instance=ExtResource("1_dn72j")]
+layout_mode = 2
+entity_id = "h2"
+character_name = "Archer"
+card_color = Color(0.59294987, 0.53696203, 3.85046e-07, 1)
+
+[node name="Char3" parent="MarginContainer/MainVBox/TeamRow/PlayerTeam" unique_id=469699142 instance=ExtResource("1_dn72j")]
+layout_mode = 2
+entity_id = "h3"
+character_name = "Mage"
+card_color = Color(0.29655167, 0.037214216, 0.62907577, 1)
+
+[node name="HorizontalSpacer" type="Control" parent="MarginContainer/MainVBox/TeamRow" unique_id=1304375994]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MonsterTeam" type="HBoxContainer" parent="MarginContainer/MainVBox/TeamRow" unique_id=307619511]
+layout_mode = 2
+
+[node name="Mon1" parent="MarginContainer/MainVBox/TeamRow/MonsterTeam" unique_id=80949703 instance=ExtResource("1_dn72j")]
+layout_mode = 2
+entity_id = "m1"
+character_name = "Goblin"
+card_color = Color(0.13090852, 0.30356914, 0.0743174, 1)
+
+[node name="Mon2" parent="MarginContainer/MainVBox/TeamRow/MonsterTeam" unique_id=948138318 instance=ExtResource("1_dn72j")]
+layout_mode = 2
+entity_id = "m2"
+character_name = "Slime"
+card_color = Color(0.28141063, 0.26310936, 0.04462318, 1)
+
+[node name="Mon3" parent="MarginContainer/MainVBox/TeamRow/MonsterTeam" unique_id=1197670782 instance=ExtResource("1_dn72j")]
+layout_mode = 2
+entity_id = "m3"
+character_name = "Wolf"
+card_color = Color(0.12166525, 0.14173022, 0.67449, 1)
+
+[node name="MiddleSpacer" type="Control" parent="MarginContainer/MainVBox" unique_id=1371688976]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="ActionSection" type="VBoxContainer" parent="MarginContainer/MainVBox" unique_id=1058566899]
+layout_mode = 2
+
+[node name="TimelinePanel" type="PanelContainer" parent="MarginContainer/MainVBox/ActionSection" unique_id=960819463]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_cs4ly")
+
+[node name="TimelineVBox" type="VBoxContainer" parent="MarginContainer/MainVBox/ActionSection/TimelinePanel" unique_id=662095302]
+layout_mode = 2
+
+[node name="TimelineTitle" type="Label" parent="MarginContainer/MainVBox/ActionSection/TimelinePanel/TimelineVBox" unique_id=1861129262]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Upcoming Turn Order"
+
+[node name="TimelineContainer" type="HBoxContainer" parent="MarginContainer/MainVBox/ActionSection/TimelinePanel/TimelineVBox" unique_id=974456795]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="BottomSpacer" type="Control" parent="MarginContainer/MainVBox" unique_id=760888372]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="BottomSection" type="HBoxContainer" parent="MarginContainer/MainVBox" unique_id=1193914256]
+layout_mode = 2
+
+[node name="ActionLogPanel" type="PanelContainer" parent="MarginContainer/MainVBox/BottomSection" unique_id=1355024016]
+custom_minimum_size = Vector2(350, 150)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_2mw1b")
+
+[node name="ActionLogVBox" type="VBoxContainer" parent="MarginContainer/MainVBox/BottomSection/ActionLogPanel" unique_id=1822988938]
+custom_maximum_size = Vector2(532, 150)
+layout_mode = 2
+
+[node name="LogTitle" type="Label" parent="MarginContainer/MainVBox/BottomSection/ActionLogPanel/ActionLogVBox" unique_id=1475327036]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Battle Log"
+
+[node name="ActionLogLabel" type="RichTextLabel" parent="MarginContainer/MainVBox/BottomSection/ActionLogPanel/ActionLogVBox" unique_id=471400988]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.8784314, 0.8784314, 0.8784314, 1)
+
+[node name="MiddleSpacer" type="Control" parent="MarginContainer/MainVBox/BottomSection" unique_id=967862693]
+custom_maximum_size = Vector2(-1, 150)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="ButtonsRow" type="HBoxContainer" parent="MarginContainer/MainVBox/BottomSection" unique_id=1180863762]
+custom_minimum_size = Vector2(438, 150)
+custom_maximum_size = Vector2(438, 150)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="ActionButton" type="Button" parent="MarginContainer/MainVBox/BottomSection/ButtonsRow" unique_id=1925163302]
+custom_maximum_size = Vector2(151, -1)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Execute Next Turn"
+autowrap_mode = 2
+
+[node name="Skill2Button" type="Button" parent="MarginContainer/MainVBox/BottomSection/ButtonsRow" unique_id=852522786]
+custom_maximum_size = Vector2(151, 150)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Heavy Strike (1.5x)"
+autowrap_mode = 2
+
+[node name="Skill3Button" type="Button" parent="MarginContainer/MainVBox/BottomSection/ButtonsRow" unique_id=700027255]
+custom_maximum_size = Vector2(151, -1)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Weakening Hex"
+autowrap_mode = 2
+
+[node name="GameOverOverlay" type="Control" parent="." unique_id=514639456]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DarkBackground" type="ColorRect" parent="GameOverOverlay" unique_id=1595388370]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.94509804)
+
+[node name="CenterContainer" type="CenterContainer" parent="GameOverOverlay" unique_id=779575184]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GameOverPanel" type="PanelContainer" parent="GameOverOverlay/CenterContainer" unique_id=1049839919]
+custom_minimum_size = Vector2(500, 250)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_h37n4")
+
+[node name="GameOverVBox" type="VBoxContainer" parent="GameOverOverlay/CenterContainer/GameOverPanel" unique_id=45415371]
+layout_mode = 2
+
+[node name="GameOverLabel" type="Label" parent="GameOverOverlay/CenterContainer/GameOverPanel/GameOverVBox" unique_id=345629455]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 72
+text = "GAME OVER"
+
+[node name="HintLabel" type="Label" parent="GameOverOverlay/CenterContainer/GameOverPanel/GameOverVBox" unique_id=917855022]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "Click anywhere to restart"

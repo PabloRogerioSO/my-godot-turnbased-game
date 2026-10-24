@@ -1,0 +1,73 @@
+[gd_scene format=3 uid="uid://dvwg7ahpaagi8"]
+
+[ext_resource type="Script" uid="uid://bmbvpur2y60f2" path="res://scenes/entities/health_bar.gd" id="1_7o6l8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cs4ly"]
+bg_color = Color(0.7176471, 0.10980392, 0.10980392, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2mw1b"]
+bg_color = Color(0.29803923, 0.6862745, 0.3137255, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h37n4"]
+bg_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hveom"]
+bg_color = Color(1, 1, 1, 1)
+
+[node name="HealthBar" type="Control" unique_id=1625219164]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_7o6l8")
+
+[node name="Bar" type="ProgressBar" parent="." unique_id=2144325020]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_cs4ly")
+theme_override_styles/fill = SubResource("StyleBoxFlat_2mw1b")
+value = 100.0
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="." unique_id=24005277]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ShieldBar" type="ProgressBar" parent="." unique_id=1890405538]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -46.0
+offset_bottom = -36.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_h37n4")
+theme_override_styles/fill = SubResource("StyleBoxFlat_hveom")
+show_percentage = false
