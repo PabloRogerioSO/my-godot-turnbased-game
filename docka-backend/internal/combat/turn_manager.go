@@ -22,6 +22,7 @@ func (s *CombatState) Tick() {
 	s.CurrentTick++
 
 	for _, e := range s.Entities {
+		// Skip dead and banished entities. They don't gain CR.
 		if !e.Alive || e.HasStatus("BANISHED") {
 			continue
 		}
@@ -40,6 +41,7 @@ func (s *CombatState) GetNextActor() *entity.Entity {
 		var anyActiveAlive bool
 
 		for _, e := range s.Entities {
+			// Banished entities are skipped
 			if e.Alive && !e.HasStatus("BANISHED") {
 				anyActiveAlive = true
 				if e.CombatReadiness >= CRThreshold {
@@ -61,6 +63,8 @@ func (s *CombatState) GetNextActor() *entity.Entity {
 			})
 
 			actor := readyEntities[0]
+
+			// CR Overflow Logic: Subtract 100 when taking a turn
 			actor.CombatReadiness -= CRThreshold
 			if actor.CombatReadiness < 0 {
 				actor.CombatReadiness = 0
@@ -89,7 +93,7 @@ func (s *CombatState) PeekNextActor() *entity.Entity {
 	return simState.GetNextActor()
 }
 
-// MODIFIED: Returns exactly one of each character, ordered by future turn, but displaying CURRENT CR
+// SimulateTimeline returns the predicted order of the next N turns
 func (s *CombatState) SimulateTimeline() []TimelineEntry {
 	simEntities := make([]*entity.Entity, len(s.Entities))
 	for i, e := range s.Entities {
@@ -112,8 +116,7 @@ func (s *CombatState) SimulateTimeline() []TimelineEntry {
 		}
 	}
 
-	// Simulate until we have seen every active entity at least once
-	for i := 0; i < 50; i++ { // 50 is a hard limit to prevent infinite loops
+	for i := 0; i < 50; i++ {
 		actor := simState.GetNextActor()
 		if actor == nil {
 			break
@@ -121,17 +124,9 @@ func (s *CombatState) SimulateTimeline() []TimelineEntry {
 
 		if !seen[actor.ID] {
 			seen[actor.ID] = true
-
-			// Get the REAL current CR from the actual state
-			currentCR := 0.0
-			for _, realE := range s.Entities {
-				if realE.ID == actor.ID {
-					currentCR = realE.CombatReadiness
-					break
-				}
-			}
-
-			order = append(order, TimelineEntry{Name: actor.Name, CR: currentCR})
+			// The GetNextActor function subtracts 100. We add 100 back to show the "peak" CR they reached.
+			predictedCR := actor.CombatReadiness + 100.0
+			order = append(order, TimelineEntry{Name: actor.Name, CR: predictedCR})
 		}
 
 		if len(order) >= activeCount {

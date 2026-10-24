@@ -25,13 +25,24 @@ type StatusEffect struct {
 	IsDebuff    bool   `json:"is_debuff"`
 }
 
+type Passive struct {
+	Type   string  `json:"type"`
+	Chance float64 `json:"chance"`
+	Value  float64 `json:"value"`
+}
+
 type SkillEffect struct {
-	Type       string  `json:"type"`
-	Multiplier float64 `json:"multiplier"`
-	StatusType string  `json:"status_type"`
-	Value      int     `json:"value"`
-	Duration   int     `json:"duration"`
-	IsDebuff   bool    `json:"is_debuff"`
+	Type             string  `json:"type"`
+	Multiplier       float64 `json:"multiplier"`
+	StatusType       string  `json:"status_type"`
+	Value            int     `json:"value"`
+	Duration         int     `json:"duration"`
+	IsDebuff         bool    `json:"is_debuff"`
+	EffectTargetType string  `json:"effect_target_type"`
+
+	HPMultiplier   float64 `json:"hp_multiplier"`
+	Condition      string  `json:"condition"`
+	DefPenetration int     `json:"def_penetration"`
 }
 
 type Skill struct {
@@ -41,6 +52,8 @@ type Skill struct {
 	Cooldown        int           `json:"cooldown"`
 	CurrentCooldown int           `json:"current_cooldown"`
 	Effects         []SkillEffect `json:"effects"`
+	MaxStacks       int           `json:"max_stacks"`
+	StackMultiplier float64       `json:"stack_multiplier"`
 }
 
 type Entity struct {
@@ -51,8 +64,9 @@ type Entity struct {
 	Alive         bool           `json:"alive"`
 	IsUnrevivable bool           `json:"is_unrevivable"`
 	Skills        []Skill        `json:"skills"`
-	Passives      []string       `json:"passives"`
+	Passives      []Passive      `json:"passives"`
 	StatusEffects []StatusEffect `json:"status_effects"`
+	SkillCounters map[string]int `json:"skill_counters"`
 
 	CombatReadiness float64 `json:"combat_readiness"`
 	ReachedCRAtTick int64   `json:"reached_cr_at_tick"`
@@ -75,13 +89,13 @@ func (e *Entity) EffectiveSpeed() float64 {
 	return speed
 }
 
-func (e *Entity) HasPassive(passiveName string) bool {
+func (e *Entity) GetPassive(passiveType string) *Passive {
 	for _, p := range e.Passives {
-		if p == passiveName {
-			return true
+		if p.Type == passiveType {
+			return &p
 		}
 	}
-	return false
+	return nil
 }
 
 func (e *Entity) HasStatus(statusType string) bool {
@@ -112,6 +126,7 @@ func (e *Entity) GetEffectiveDefense() int {
 	return def
 }
 
+// UPDATED: TakeDamage now respects Immortality and calculates accurate HP loss
 func (e *Entity) TakeDamage(amount int) (shieldAbsorbed int, hpLost int) {
 	remainingDamage := amount
 	newStatuses := make([]StatusEffect, 0)
@@ -137,8 +152,24 @@ func (e *Entity) TakeDamage(amount int) (shieldAbsorbed int, hpLost int) {
 	e.StatusEffects = newStatuses
 
 	if remainingDamage > 0 {
-		e.Stats.HP -= remainingDamage
-		hpLost = remainingDamage
+		actualDamage := remainingDamage
+
+		// Check if the damage would kill the entity
+		if e.Stats.HP-remainingDamage < 0 {
+			if e.HasStatus("IMMORTALITY") {
+				// Immortality prevents death. HP stops at 1.
+				actualDamage = e.Stats.HP - 1
+				if actualDamage < 0 {
+					actualDamage = 0
+				} // Safety check
+			} else {
+				// Normal death
+				actualDamage = e.Stats.HP
+			}
+		}
+
+		e.Stats.HP -= actualDamage
+		hpLost = actualDamage
 		if e.Stats.HP < 0 {
 			e.Stats.HP = 0
 		}
