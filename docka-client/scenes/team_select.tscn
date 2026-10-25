@@ -4,35 +4,63 @@
 
 [node name="TeamSelect" type="Control" unique_id=802196690]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_cf774")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1215779332]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.11350063, 0.3235715, 0.16840252, 1)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1522410409]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="MainVBox" type="VBoxContainer" parent="." unique_id=1522410409]
+custom_minimum_size = Vector2(600, 300)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -204.5
+offset_right = 300.0
+offset_bottom = 204.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
 
-[node name="Label" type="Label" parent="VBoxContainer" unique_id=1743401986]
+[node name="TitleLabel" type="Label" parent="MainVBox" unique_id=1743401986]
 layout_mode = 2
-text = "Select 3 Heroes"
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 32
+text = "Escolha 3 Personagens"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1834839713]
+[node name="RosterContainer" type="HBoxContainer" parent="MainVBox" unique_id=1834839713]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
+theme_override_constants/separation = 10
 
-[node name="Label2" type="Label" parent="VBoxContainer" unique_id=750373772]
+[node name="SelectedTitle" type="Label" parent="MainVBox" unique_id=750373772]
 layout_mode = 2
-text = "Selected Team"
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 24
+text = "Time Escolhido"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=1322302441]
+[node name="SelectedContainer" type="HBoxContainer" parent="MainVBox" unique_id=1322302441]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
+theme_override_constants/separation = 10
 
-[node name="Button" type="Button" parent="VBoxContainer" unique_id=1211110292]
+[node name="StartButton" type="Button" parent="MainVBox" unique_id=1211110292]
+custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
 text = "Start Battle"

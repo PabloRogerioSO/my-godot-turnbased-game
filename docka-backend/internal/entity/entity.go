@@ -14,6 +14,8 @@ type Stats struct {
 	SpeedModifier    float64
 	Effectiveness    int
 	EffectResistance int
+	HitChance        float64 `json:"hit_chance"`
+	Evasion          float64 `json:"evasion"`
 }
 
 type StatusEffect struct {
@@ -40,6 +42,8 @@ type SkillEffect struct {
 	IsDebuff         bool    `json:"is_debuff"`
 	EffectTargetType string  `json:"effect_target_type"`
 
+	// E7 / Complex Skill Mechanics
+	EffectChance   float64 `json:"effect_chance"`
 	HPMultiplier   float64 `json:"hp_multiplier"`
 	Condition      string  `json:"condition"`
 	DefPenetration int     `json:"def_penetration"`
@@ -52,14 +56,18 @@ type Skill struct {
 	Cooldown        int           `json:"cooldown"`
 	CurrentCooldown int           `json:"current_cooldown"`
 	Effects         []SkillEffect `json:"effects"`
-	MaxStacks       int           `json:"max_stacks"`
-	StackMultiplier float64       `json:"stack_multiplier"`
+
+	// Skill Stacking Mechanics
+	MaxStacks       int     `json:"max_stacks"`
+	StackMultiplier float64 `json:"stack_multiplier"`
 }
 
 type Entity struct {
 	ID            string         `json:"id"`
 	Name          string         `json:"name"`
 	Team          Team           `json:"team"`
+	Faction       string         `json:"faction"`
+	Subclass      string         `json:"subclass"`
 	Stats         Stats          `json:"stats"`
 	Alive         bool           `json:"alive"`
 	IsUnrevivable bool           `json:"is_unrevivable"`
@@ -72,9 +80,15 @@ type Entity struct {
 	ReachedCRAtTick int64   `json:"reached_cr_at_tick"`
 }
 
+func (e *Entity) GetHitChance() float64 {
+	if e.Stats.HitChance == 0 {
+		return 100.0
+	}
+	return e.Stats.HitChance
+}
+
 func (e *Entity) EffectiveSpeed() float64 {
 	speed := e.Stats.BaseSpeed + e.Stats.SpeedModifier
-
 	for _, status := range e.StatusEffects {
 		if status.Type == "HASTE" {
 			speed += float64(status.Value)
@@ -82,7 +96,6 @@ func (e *Entity) EffectiveSpeed() float64 {
 			speed -= float64(status.Value)
 		}
 	}
-
 	if speed < 1 {
 		return 1
 	}
@@ -109,24 +122,20 @@ func (e *Entity) HasStatus(statusType string) bool {
 
 func (e *Entity) GetEffectiveDefense() int {
 	def := e.Stats.Defense
-
 	for _, status := range e.StatusEffects {
 		if status.Type == "DEF_DOWN" {
-			reduction := (def * status.Value) / 100
-			def -= reduction
+			def -= (def * status.Value) / 100
 		} else if status.Type == "DEF_UP" {
-			increase := (def * status.Value) / 100
-			def += increase
+			def += (def * status.Value) / 100
 		}
 	}
-
 	if def < 0 {
 		return 0
 	}
 	return def
 }
 
-// UPDATED: TakeDamage now respects Immortality and calculates accurate HP loss
+// TakeDamage handles Shields, Immortality, and accurate HP loss tracking
 func (e *Entity) TakeDamage(amount int) (shieldAbsorbed int, hpLost int) {
 	remainingDamage := amount
 	newStatuses := make([]StatusEffect, 0)
@@ -153,28 +162,22 @@ func (e *Entity) TakeDamage(amount int) (shieldAbsorbed int, hpLost int) {
 
 	if remainingDamage > 0 {
 		actualDamage := remainingDamage
-
-		// Check if the damage would kill the entity
 		if e.Stats.HP-remainingDamage < 0 {
 			if e.HasStatus("IMMORTALITY") {
-				// Immortality prevents death. HP stops at 1.
 				actualDamage = e.Stats.HP - 1
 				if actualDamage < 0 {
 					actualDamage = 0
-				} // Safety check
+				}
 			} else {
-				// Normal death
 				actualDamage = e.Stats.HP
 			}
 		}
-
 		e.Stats.HP -= actualDamage
 		hpLost = actualDamage
 		if e.Stats.HP < 0 {
 			e.Stats.HP = 0
 		}
 	}
-
 	return shieldAbsorbed, hpLost
 }
 
@@ -182,7 +185,6 @@ func (e *Entity) Heal(amount int) int {
 	if !e.Alive {
 		return 0
 	}
-
 	e.Stats.HP += amount
 	if e.Stats.HP > e.Stats.MaxHP {
 		actualHeal := amount - (e.Stats.HP - e.Stats.MaxHP)
@@ -199,7 +201,6 @@ func (e *Entity) TickStatusEffects() {
 			active = append(active, status)
 			continue
 		}
-
 		status.Duration--
 		if status.Duration > 0 {
 			active = append(active, status)

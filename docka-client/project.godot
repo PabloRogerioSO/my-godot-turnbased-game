@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Docka Client"
-run/main_scene="uid://dbtf64iv4dsa5"
+run/main_scene="uid://btm7l4dw76otm"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 

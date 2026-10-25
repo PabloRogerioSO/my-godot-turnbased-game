@@ -32,11 +32,9 @@ var is_player_turn: bool = false
 var current_active_id: String = ""
 var active_team: int = 0
 
-var base_skill2_text: String = "Coordinated Strike"
-var base_skill3_text: String = "Explosion"
-
 var latest_entities: Array = []
 var pending_skill_index: int = -1 
+var pending_target_type: String = ""
 
 func _ready() -> void:
 	http_request = HTTPRequest.new()
@@ -56,9 +54,6 @@ func _ready() -> void:
 	if game_over_overlay != null:
 		game_over_overlay.gui_input.connect(_on_game_over_overlay_input)
 	
-	if skill2_button != null: skill2_button.text = base_skill2_text
-	if skill3_button != null: skill3_button.text = base_skill3_text
-	
 	var all_cards = [hero1, hero2, hero3, mob1, mob2, mob3]
 	for card in all_cards:
 		if card != null:
@@ -71,11 +66,11 @@ func _on_game_over_overlay_input(event: InputEvent) -> void:
 		_on_reset_button_pressed()
 
 func _on_reset_button_pressed() -> void:
-	print("DEBUG: Requesting reset...")
 	game_over_overlay.visible = false
 	action_log_label.text = "Resetting game..."
 	selected_target_id = ""
 	pending_skill_index = -1
+	pending_target_type = ""
 	fetch_state("http://localhost:8080/api/reset", HTTPClient.METHOD_POST, 0)
 
 func _on_card_clicked(entity_id: String) -> void:
@@ -84,12 +79,19 @@ func _on_card_clicked(entity_id: String) -> void:
 		
 	if pending_skill_index != -1:
 		var is_enemy = false
+		var is_ally = false
+		
 		for entity in latest_entities:
-			if str(entity["id"]) == entity_id and int(entity["team"]) != active_team:
-				is_enemy = true
+			if str(entity["id"]) == entity_id:
+				if int(entity["team"]) == active_team:
+					is_ally = true
+				else:
+					is_enemy = true
 				break
 		
-		if not is_enemy:
+		if pending_target_type == "SINGLE_ENEMY" and not is_enemy:
+			return
+		if pending_target_type == "SINGLE_ALLY" and not is_ally:
 			return
 
 	selected_target_id = entity_id
@@ -99,6 +101,7 @@ func _on_card_clicked(entity_id: String) -> void:
 		disable_buttons()
 		fetch_state("http://localhost:8080/api/action", HTTPClient.METHOD_POST, pending_skill_index)
 		pending_skill_index = -1
+		pending_target_type = ""
 		turn_label.text = "Executing..."
 
 func _on_action_button_pressed(skill_index: int) -> void:
@@ -110,11 +113,18 @@ func _on_action_button_pressed(skill_index: int) -> void:
 			
 	if active_entity != null and skill_index < active_entity["skills"].size():
 		var skill = active_entity["skills"][skill_index]
+		var target_type = skill["target_type"]
 		
-		if skill["target_type"] == "SINGLE" and is_player_turn and not auto_mode_check.button_pressed:
+		if (target_type == "SINGLE_ENEMY" or target_type == "SINGLE_ALLY") and is_player_turn and not auto_mode_check.button_pressed:
 			pending_skill_index = skill_index
+			pending_target_type = target_type
 			selected_target_id = ""
-			turn_label.text = "Select a target for " + skill["name"] + "..."
+			
+			if target_type == "SINGLE_ENEMY":
+				turn_label.text = "Select an ENEMY for " + skill["name"] + "..."
+			else:
+				turn_label.text = "Select an ALLY for " + skill["name"] + "..."
+				
 			refresh_highlights()
 			return 
 
@@ -125,6 +135,7 @@ func _on_action_button_pressed(skill_index: int) -> void:
 		
 	fetch_state("http://localhost:8080/api/action", HTTPClient.METHOD_POST, skill_index)
 	pending_skill_index = -1
+	pending_target_type = ""
 
 func fetch_state(url: String, method: int, skill_index: int) -> void:
 	var body = JSON.stringify({"skill_index": skill_index, "target_id": selected_target_id})
@@ -218,19 +229,19 @@ func handle_turn_logic(data: Dictionary) -> void:
 			if skills.size() > 1 and skill2_button != null:
 				var s2_cd = int(skills[1]["current_cooldown"])
 				if s2_cd > 0:
-					skill2_button.text = base_skill2_text + " (CD: " + str(s2_cd) + ")"
+					skill2_button.text = skills[1]["name"] + " (CD: " + str(s2_cd) + ")"
 					skill2_button.disabled = true
 				else:
-					skill2_button.text = base_skill2_text
+					skill2_button.text = skills[1]["name"]
 					skill2_button.disabled = false
 					
 			if skills.size() > 2 and skill3_button != null:
 				var s3_cd = int(skills[2]["current_cooldown"])
 				if s3_cd > 0:
-					skill3_button.text = base_skill3_text + " (CD: " + str(s3_cd) + ")"
+					skill3_button.text = skills[2]["name"] + " (CD: " + str(s3_cd) + ")"
 					skill3_button.disabled = true
 				else:
-					skill3_button.text = base_skill3_text
+					skill3_button.text = skills[2]["name"]
 					skill3_button.disabled = false
 		
 		if action_button != null: action_button.disabled = false
@@ -255,31 +266,52 @@ func get_card_by_id(id: String):
 	return null
 
 func update_cards(entities: Array) -> void:
+	var players = []
+	var monsters = []
+	
 	for entity in entities:
-		var id = entity["id"]
-		var hp = int(entity["stats"]["HP"])
-		var max_hp = int(entity["stats"]["MaxHP"])
-		var is_alive = entity["alive"]
-		
-		var statuses = []
-		if entity.has("status_effects") and entity["status_effects"] is Array:
-			statuses = entity["status_effects"]
-		
-		var total_shield = 0
-		var is_banished = false
-		for s in statuses:
-			if s["type"] == "SHIELD":
-				total_shield += int(s["value"])
-			elif s["type"] == "BANISHED":
-				is_banished = true
-		
-		var card = get_card_by_id(id)
+		if int(entity["team"]) == 0:
+			players.append(entity)
+		else:
+			monsters.append(entity)
+			
+	var hero_slots = [hero1, hero2, hero3]
+	for i in range(min(players.size(), hero_slots.size())):
+		var card = hero_slots[i]
 		if card != null:
-			update_card(card, max_hp, hp, is_alive, statuses, total_shield, is_banished)
+			card.entity_id = str(players[i]["id"]) 
+			update_card(card, players[i])
+			
+	var mob_slots = [mob1, mob2, mob3]
+	for i in range(min(monsters.size(), mob_slots.size())):
+		var card = mob_slots[i]
+		if card != null:
+			card.entity_id = str(monsters[i]["id"])
+			update_card(card, monsters[i])
 
-func update_card(card, max_hp: int, current_hp: int, is_alive: bool, statuses: Array, shield: int, is_banished: bool) -> void:
+func update_card(card, entity: Dictionary) -> void:
+	var hp = int(entity["stats"]["HP"])
+	var max_hp = int(entity["stats"]["MaxHP"])
+	var is_alive = entity["alive"]
+	var name_str = str(entity["name"])
+	
+	var statuses = []
+	if entity.has("status_effects") and entity["status_effects"] is Array:
+		statuses = entity["status_effects"]
+	
+	var total_shield = 0
+	var is_banished = false
+	for s in statuses:
+		if s["type"] == "SHIELD":
+			total_shield += int(s["value"])
+		elif s["type"] == "BANISHED":
+			is_banished = true
+	
 	if card.health_bar != null:
-		card.health_bar.setup(max_hp, current_hp, shield)
+		card.health_bar.setup(max_hp, hp, total_shield)
+		
+	if card.name_label != null:
+		card.name_label.text = name_str
 		
 	card.update_statuses(statuses)
 	
@@ -335,16 +367,47 @@ func update_timeline(timeline_data: Array) -> void:
 			tween_arrow.tween_property(arrow, "modulate:a", 1.0, 0.3).set_delay(i * 0.05 + 0.05)
 
 func play_visual_steps(steps: Array) -> void:
+	if steps.is_empty(): return
+
+	var current_batch = []
+	var current_group = ""
+
 	for step in steps:
 		var step_type = step["type"]
-		var target_id = step["target"]
-		var val = int(step["value"]) 
+		var step_group = step_type
 		
-		# Changed text strings to be much shorter to prevent overlap
+		# Added "MISS" to the DAMAGE_PHASE so it shows up at the same time as the damage number
+		if step_type in ["DAMAGE", "SHARED_DAMAGE", "REFLECT_DAMAGE", "SHIELD_DAMAGE", "MISS"]:
+			step_group = "DAMAGE_PHASE"
+			
+		if step_group != current_group and not current_batch.is_empty():
+			process_visual_batch(current_batch)
+			await get_tree().create_timer(ACTION_DELAY).timeout
+			current_batch.clear()
+
+		current_batch.append(step)
+		current_group = step_group
+
+	if not current_batch.is_empty():
+		process_visual_batch(current_batch)
+		await get_tree().create_timer(ACTION_DELAY).timeout
+
+func process_visual_batch(batch: Array) -> void:
+	for step in batch:
+		var step_type = step["type"]
+		var target_id = step["target"]
+		var val = int(step["value"]) if step.has("value") else 0
+		
 		if step_type == "DAMAGE":
 			spawn_floating_text(target_id, "-" + str(val), Color(1.0, 0.2, 0.2))
+		elif step_type == "SHARED_DAMAGE":
+			spawn_floating_text(target_id, "-" + str(val), Color(0.8, 0.8, 0.8))
+		elif step_type == "REFLECT_DAMAGE":
+			spawn_floating_text(target_id, "-" + str(val), Color(0.0, 0.8, 1.0))
+		elif step_type == "SHIELD_DAMAGE":
+			spawn_floating_text(target_id, "-" + str(val), Color(1.0, 1.0, 1.0))
 		elif step_type == "EXTRA_DAMAGE":
-			spawn_floating_text(target_id, "-" + str(val), Color(1.0, 0.4, 0.0)) # Orange implies Explosion
+			spawn_floating_text(target_id, "-" + str(val), Color(1.0, 0.4, 0.0)) 
 		elif step_type == "DUAL_ATTACK":
 			spawn_floating_text(target_id, "Dual!", Color(0.0, 0.8, 1.0))
 		elif step_type == "CR_PUSH":
@@ -356,15 +419,15 @@ func play_visual_steps(steps: Array) -> void:
 		elif step_type == "BANISH":
 			spawn_floating_text(target_id, "BANISHED!", Color(0.6, 0.2, 1.0))
 		elif step_type == "COUNTER":
-			spawn_floating_text(target_id, "-" + str(val), Color(1.0, 0.6, 0.0)) # Orange implies Counter
+			spawn_floating_text(target_id, "-" + str(val), Color(1.0, 0.6, 0.0)) 
 		elif step_type == "DOT":
-			spawn_floating_text(target_id, "-" + str(val), Color(0.6, 0.2, 0.8)) # Purple implies DoT
+			spawn_floating_text(target_id, "-" + str(val), Color(0.6, 0.2, 0.8)) 
 		elif step_type == "HEAL":
 			spawn_floating_text(target_id, "+" + str(val), Color(0.2, 0.8, 0.2))
+		elif step_type == "REVIVE":
+			spawn_floating_text(target_id, "REVIVED!", Color(0.9, 0.9, 0.9))
 		elif step_type == "CLEANSE":
 			spawn_floating_text(target_id, "Cleansed!", Color(0.9, 0.9, 0.9))
-		elif step_type == "SHIELD_DAMAGE":
-			spawn_floating_text(target_id, "-" + str(val), Color(1.0, 1.0, 1.0)) # White implies Shield
 		elif step_type == "BUFF":
 			spawn_floating_text(target_id, str(step["text"]), Color(0.2, 0.8, 0.2))
 		elif step_type == "SHIELD_ADD":
@@ -375,8 +438,8 @@ func play_visual_steps(steps: Array) -> void:
 			spawn_floating_text(target_id, "Resist", Color(0.5, 0.5, 0.5))
 		elif step_type == "INTERCEPT":
 			spawn_floating_text(target_id, str(step["text"]), Color(1.0, 0.9, 0.0))
-			
-		await get_tree().create_timer(ACTION_DELAY).timeout
+		elif step_type == "MISS":
+			spawn_floating_text(target_id, "MISS", Color(0.6, 0.6, 0.6))
 
 func spawn_floating_text(target_id: String, text: String, color: Color) -> void:
 	var target_card = get_card_by_id(target_id)
@@ -386,7 +449,7 @@ func spawn_floating_text(target_id: String, text: String, color: Color) -> void:
 	var label = Label.new()
 	label.text = text
 	label.add_theme_color_override("font_color", color)
-	label.add_theme_font_size_override("font_size", 18) # Reduced from 24 to 18 to fit better
+	label.add_theme_font_size_override("font_size", 18) 
 	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
 	label.add_theme_constant_override("outline_size", 4)
 	
@@ -398,8 +461,6 @@ func spawn_floating_text(target_id: String, text: String, color: Color) -> void:
 	label.z_index = 100 
 	
 	var card_center = target_card.global_position + (target_card.size / 2)
-	
-	# Added a larger random Y offset so simultaneous AoE texts don't merge perfectly horizontally
 	label.global_position = card_center - Vector2(50, 10) + Vector2(randf_range(-10, 10), randf_range(-20, 10))
 	
 	var tween = create_tween()

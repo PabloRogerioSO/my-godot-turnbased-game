@@ -9,7 +9,7 @@ signal card_clicked(entity_id: String)
 
 @onready var card_rect: ColorRect = $CardRect
 @onready var name_label: Label = $NameLabel
-@onready var status_icon_container: HBoxContainer = $StatusIconContainer
+@onready var status_icon_container: FlowContainer = $StatusIconContainer
 @onready var health_bar = $HealthBar
 
 var original_color: Color
@@ -18,7 +18,6 @@ func _ready() -> void:
 	original_color = card_color
 	mouse_filter = Control.MOUSE_FILTER_STOP 
 	
-	# Recursively make all children ignore the mouse so they don't block the root
 	for child in get_children():
 		_ignore_mouse_recursive(child)
 	
@@ -29,7 +28,6 @@ func _ready() -> void:
 	if health_bar != null:
 		health_bar.setup(max_hp)
 		
-	# Clear any default icons in the container
 	if status_icon_container != null:
 		for child in status_icon_container.get_children():
 			child.queue_free()
@@ -51,9 +49,9 @@ func update_highlight(is_active_turn: bool, is_selected_target: bool) -> void:
 		return 
 		
 	if is_active_turn:
-		card_rect.color = Color(1.0, 0.8, 0.2) # #FFCC33 (Gold)
+		card_rect.color = Color(1.0, 0.8, 0.2)
 	elif is_selected_target:
-		card_rect.color = Color(0.9, 0.2, 0.2) # #E63333 (Red)
+		card_rect.color = Color(0.9, 0.2, 0.2)
 	else:
 		card_rect.color = original_color
 
@@ -61,41 +59,31 @@ func update_statuses(statuses: Array) -> void:
 	if status_icon_container == null:
 		return
 		
-	# Clear existing icons
 	for child in status_icon_container.get_children():
 		child.queue_free()
 		
-	# Create a new icon for each status
 	for s in statuses:
 		var status_type = str(s["type"])
-		var icon = ColorRect.new()
-		icon.custom_minimum_size = Vector2(16, 16)
 		
-		# Determine the color based on the status type
+		var icon = ColorRect.new()
+		icon.custom_minimum_size = Vector2(12, 12) 
+		
 		var is_debuff = false
 		if s.has("is_debuff"):
 			is_debuff = s["is_debuff"]
 			
 		match status_type:
-			"HASTE":
-				icon.color = Color(0.2, 0.8, 1.0) # #33CCFF (Light Blue)
-			"SLOW":
-				icon.color = Color(0.8, 0.2, 0.8) # #CC33CC (Purple)
-			"POISON":
-				icon.color = Color(0.6, 0.2, 0.8) # #9933CC (Dark Purple)
-			"DEF_UP":
-				icon.color = Color(0.2, 0.8, 0.2) # #33CC33 (Green)
-			"DEF_DOWN":
-				icon.color = Color(1.0, 0.2, 0.2) # #FF3333 (Red)
-			"SHIELD":
-				icon.color = Color(1.0, 1.0, 1.0) # #FFFFFF (White)
-			"BANISHED":
-				icon.color = Color(0.3, 0.0, 0.5) # #4D0080 (Deep Purple)
+			"HASTE": icon.color = Color(0.2, 0.8, 1.0)
+			"SLOW": icon.color = Color(0.8, 0.2, 0.8)
+			"POISON": icon.color = Color(0.6, 0.2, 0.8)
+			"DEF_UP": icon.color = Color(0.2, 0.8, 0.2)
+			"DEF_DOWN": icon.color = Color(1.0, 0.2, 0.2)
+			"SHIELD": icon.color = Color(1.0, 1.0, 1.0)
+			"BANISHED": icon.color = Color(0.3, 0.0, 0.5)
+			"MORALE": icon.color = Color(1.0, 0.8, 0.2)
+			"JOY": icon.color = Color(1.0, 0.5, 0.0)
 			_:
-				# Fallback color for unknown statuses
-				if is_debuff:
-					icon.color = Color(0.8, 0.2, 0.2)
-				else:
-					icon.color = Color(0.2, 0.8, 0.2)
+				if is_debuff: icon.color = Color(0.8, 0.2, 0.2)
+				else: icon.color = Color(0.2, 0.8, 0.2)
 		
 		status_icon_container.add_child(icon)

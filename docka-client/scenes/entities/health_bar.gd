@@ -17,12 +17,9 @@ func setup(new_max_hp: int, new_current_hp: int = -1, new_shield: int = 0) -> vo
 		
 	current_shield = new_shield
 	
-	# Update HP Bar
 	bar.max_value = max_hp
 	bar.value = current_hp
 	
-	# Update Shield Bar
-	# We use a visual ratio so the shield bar doesn't get out of bounds if shield > max_hp
 	shield_bar.max_value = max_hp
 	shield_bar.value = current_shield
 	
